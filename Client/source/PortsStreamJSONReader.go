@@ -2,13 +2,15 @@ package source
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/x1n13y84issmd42/portobello/shared/models"
 )
 
-// PortsStreamJSONReader reads a JSON file containing ports data.
+// PortsStreamJSONReader reads a JSON file containing ports data
+// and emits parsed ports via the returned channel.
+// Working in a streaming fashion, it works with arbitrarily
+// large JSON files without running out of memory.
 func PortsStreamJSONReader(filePath string) (PortsChannel, error) {
 	ch := make(PortsChannel)
 
@@ -17,12 +19,11 @@ func PortsStreamJSONReader(filePath string) (PortsChannel, error) {
 		return nil, fileErr
 	}
 
+	// Reading the JSON files in a streaming fashion.
 	go func() {
-		fmt.Println("here")
 		defer close(ch)
-		decoder := json.NewDecoder(file)
 
-		var err error
+		decoder := json.NewDecoder(file)
 
 		// Skipping the '{'
 		t, err := decoder.Token()
@@ -32,6 +33,9 @@ func PortsStreamJSONReader(filePath string) (PortsChannel, error) {
 
 		for decoder.More() {
 			t, err = decoder.Token()
+			if err != nil {
+				panic(err)
+			}
 
 			if portID, ok := t.(string); ok {
 				port := &models.Port{}

@@ -20,7 +20,7 @@ message Port {
 	repeated float Coordinates = 7;
 	string Province = 8;
 	string Timezone = 9;
-	string Unlocs = 10;
+	repeated string Unlocs = 10;
 	string Code = 11;
 }
 
