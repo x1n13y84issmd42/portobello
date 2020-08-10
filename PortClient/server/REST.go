@@ -91,8 +91,8 @@ func (server *Server) HandlePorts(r *http.Request) (interface{}, uint, error) {
 	return port, 200, nil
 }
 
-// ImportProgress is a JSON response for import progress.
-type ImportProgress struct {
+// JSONImportProgress is a JSON response for import progress.
+type JSONImportProgress struct {
 	Progress uint
 }
 
@@ -122,5 +122,5 @@ func (server *Server) HandleImport(r *http.Request) (interface{}, uint, error) {
 		return "Working!", 202, nil
 	}
 
-	return ImportProgress{Progress: server.ImportProgress}, 200, nil
+	return JSONImportProgress{Progress: server.ImportProgress}, 200, nil
 }

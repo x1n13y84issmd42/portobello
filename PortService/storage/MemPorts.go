@@ -7,7 +7,9 @@ import (
 
 type portsmap map[models.PortID]*models.Port
 
-// MemPorts is a memory port storage.
+// MemPorts is memory storage for port data.
+// Use it when you don't need persistence or for debugging
+// when you want to exclude database interaction.
 type MemPorts struct {
 	data portsmap
 }

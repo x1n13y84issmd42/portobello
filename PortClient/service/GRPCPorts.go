@@ -43,11 +43,13 @@ func (ports *GRPCPorts) Close() {
 }
 
 // AddPort adds a port (or updates an existing) to the service.
-func (ports *GRPCPorts) AddPort(port *models.Port) {
+func (ports *GRPCPorts) AddPort(port *models.Port) error {
 	_, err := ports.Client.AddPort(context.Background(), port.Proto())
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 // GetPort looks up a port by the provided port ID.

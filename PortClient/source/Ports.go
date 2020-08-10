@@ -24,7 +24,11 @@ func ImportPorts(filePath string, reader PortsReader, ports service.Ports) (chan
 
 	go func() {
 		for port := range ch {
-			ports.AddPort(port)
+			err = ports.AddPort(port)
+			if err != nil {
+				panic(err)
+			}
+
 			progress++
 			progressChannel <- progress
 		}

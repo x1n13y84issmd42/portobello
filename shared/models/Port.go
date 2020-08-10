@@ -5,7 +5,9 @@ import "github.com/x1n13y84issmd42/portobello/shared/proto"
 type PortID = string
 
 // Port describes an entry in the ports.json file.
-// This is a canonical description of a port.
+// This is a canonical description of a port,
+// the protocol-level as well as database-level
+// port structures are derived from it.
 type Port struct {
 	ID          PortID
 	Name        string    `json:"name"`
@@ -20,7 +22,7 @@ type Port struct {
 	Code        string    `json:"code"`
 }
 
-// Proto creates a proto.Port instance from port data.
+// Proto creates a proto.Port instance from the Port data.
 func (port Port) Proto() *proto.Port {
 	protoPort := &proto.Port{
 		ID:       port.ID,

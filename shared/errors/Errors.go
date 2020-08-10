@@ -6,7 +6,7 @@ import (
 	"github.com/x1n13y84issmd42/portobello/shared/models"
 )
 
-// ErrPortNotFound is returned from Ports services when they're unable to find a port.
+// ErrPortNotFound is returned from Ports services and storages when they're unable to find a port.
 type ErrPortNotFound struct {
 	ID       models.PortID
 	SourceID string

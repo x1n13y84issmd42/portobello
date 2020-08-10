@@ -8,7 +8,7 @@ import (
 type portsmap map[models.PortID]*models.Port
 
 // MemPorts is a local in-memory Ports service.
-// Used for testing.
+// Used for testing & debugging when you want to exclude gRPC layer whatsoever.
 type MemPorts struct {
 	data portsmap
 }
@@ -26,8 +26,9 @@ func (ports *MemPorts) Close() {
 }
 
 // AddPort adds a port (or updates an existing) to the service.
-func (ports *MemPorts) AddPort(port *models.Port) {
+func (ports *MemPorts) AddPort(port *models.Port) error {
 	ports.data[port.ID] = port
+	return nil
 }
 
 // GetPort looks up a port by the provided port ID.

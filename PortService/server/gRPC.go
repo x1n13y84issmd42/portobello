@@ -42,17 +42,21 @@ func (server *PortsServer) Listen(host string) {
 	grpcServer.Serve(lis)
 }
 
-// AddPort ...
+// AddPort adds port data to the storage.
 func (server *PortsServer) AddPort(ctx context.Context, protoPort *proto.Port) (*proto.Empty, error) {
-	server.Ports.Add(models.NewPortFromProto(protoPort))
+	err := server.Ports.Add(models.NewPortFromProto(protoPort))
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &proto.Empty{}, nil
 }
 
-// GetPort ...
+// GetPort looks up port data by it's ID from portReq.
 func (server *PortsServer) GetPort(ctx context.Context, portReq *proto.GetPortRequest) (*proto.Port, error) {
 	port, err := server.Ports.Get(portReq.ID)
 	if err != nil {
-		fmt.Println(err.Error())
+		//TODO: handle other errors, i.e. from DBs and alike.
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
