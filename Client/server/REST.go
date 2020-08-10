@@ -37,24 +37,30 @@ func (server *Server) Serve(host string, port uint) {
 	http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), mux)
 }
 
+// JSONError is a JSON representation of an error message.
+type JSONError struct {
+	Error string `json:"error"`
+}
+
 // JSONHandler creates an http.Handler from an object handler.
 func (server *Server) JSONHandler(handler objectHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		resp, status, err := handler(r)
 
+		w.Header().Add("Content-Type", "application/json")
+
 		if err != nil {
-			w.WriteHeader(int(status))
-			w.Write([]byte(err.Error()))
-			return
+			resp = JSONError{Error: err.Error()}
 		}
 
 		json, err := json.Marshal(resp)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			status = http.StatusInternalServerError
 			w.Write([]byte(err.Error()))
 			return
 		}
 
+		w.WriteHeader(int(status))
 		w.Write(json)
 	}
 }
