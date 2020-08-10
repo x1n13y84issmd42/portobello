@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# protoc cannot into paths, hence the ../../../
+protoc -I shared/proto --go_out=plugins=grpc:../../../ shared/proto/ports.proto
