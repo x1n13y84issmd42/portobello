@@ -107,6 +107,9 @@ func (server *Server) HandleImport(r *http.Request) (interface{}, uint, error) {
 			return nil, 500, err
 		}
 
+		server.ImportGoing = true
+		server.ImportProgress = 0
+
 		go func() {
 			for server.ImportProgress = range progress {
 				//
@@ -115,9 +118,6 @@ func (server *Server) HandleImport(r *http.Request) (interface{}, uint, error) {
 			fmt.Printf("Done importing.\n")
 			server.ImportGoing = false
 		}()
-
-		server.ImportGoing = true
-		server.ImportProgress = 0
 
 		return "Working!", 202, nil
 	}
