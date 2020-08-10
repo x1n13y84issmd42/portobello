@@ -21,14 +21,14 @@ type GRPCPorts struct {
 }
 
 // NewGRPCPorts creates a new GRPCPorts instance.
-func NewGRPCPorts(grpcHost string, grpcPort uint) Ports {
+func NewGRPCPorts(grpcHost string) Ports {
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
-	fmt.Printf("Dialing the gRPC server @ %s:%d...\n", grpcHost, grpcPort)
+	fmt.Printf("Dialing the gRPC server @ %s...\n", grpcHost)
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", grpcHost, grpcPort), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s", grpcHost), opts...)
 	if err != nil {
-		log.Fatalf("Failed to dial the gRPC server @ %s:%d because of this: %s", grpcHost, grpcPort, err.Error())
+		log.Fatalf("Failed to dial the gRPC server @ %s because of this: %s", grpcHost, err.Error())
 	}
 
 	return &GRPCPorts{

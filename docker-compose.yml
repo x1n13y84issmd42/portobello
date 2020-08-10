@@ -1,0 +1,33 @@
+version: '3'
+services:
+
+  portclient:
+    depends_on:
+      - portservice
+    build:
+      dockerfile: docker/PortClient.Dockerfile
+      context: .
+    container_name: Portobello.Client
+    environment:
+      LISTEN_ADDR: ":80"
+      GRPCPORTS_ADDR: "portservice:8080"
+    ports:
+      - "80:80"
+    entrypoint:
+      - 'go'
+      - 'run'
+      - 'main.go'
+
+  portservice:
+    build:
+      dockerfile: docker/PortService.Dockerfile
+      context: .
+    container_name: Portobello.Service
+    environment:
+      LISTEN_ADDR: ":8080"
+    ports:
+      - "8080:8080"
+    entrypoint:
+    - 'go'
+    - 'run'
+    - 'main.go'

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/x1n13y84issmd42/portobello/Client/service"
-	"github.com/x1n13y84issmd42/portobello/Client/source"
+	"github.com/x1n13y84issmd42/portobello/PortClient/service"
+	"github.com/x1n13y84issmd42/portobello/PortClient/source"
 	"github.com/x1n13y84issmd42/portobello/shared/errors"
 )
 
@@ -30,15 +30,15 @@ func New(portsService service.Ports) *Server {
 }
 
 // Serve listens for incoming requests.
-func (server *Server) Serve(host string, port uint) {
+func (server *Server) Serve(host string) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/ports/", server.JSONHandler(server.HandlePorts))
 	mux.HandleFunc("/import", server.JSONHandler(server.HandleImport))
 
-	fmt.Printf("Starting the REST server @ %s:%d...\n", host, port)
+	fmt.Printf("Starting the REST server @ %s...\n", host)
 
-	http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), mux)
+	http.ListenAndServe(fmt.Sprintf("%s", host), mux)
 }
 
 // JSONError is a JSON representation of an error message.

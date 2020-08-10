@@ -27,17 +27,17 @@ func New(store storage.Ports) *PortsServer {
 }
 
 // Listen opens a port and listens for gRPC calls.
-func (server *PortsServer) Listen(host string, port uint) {
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
+func (server *PortsServer) Listen(host string) {
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s", host))
 	if err != nil {
-		log.Fatalf("Failed to listen @ %s:%d because of %v", host, port, err)
+		log.Fatalf("Failed to listen @ %s because of %v", host, err)
 	}
 
 	opts := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(opts...)
 	proto.RegisterPortsServer(grpcServer, server)
 
-	fmt.Printf("Starting the gRPC server @ %s:%d...\n", host, port)
+	fmt.Printf("Starting the gRPC server @ %s...\n", host)
 
 	grpcServer.Serve(lis)
 }

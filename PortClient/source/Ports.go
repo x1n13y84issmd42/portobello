@@ -1,7 +1,7 @@
 package source
 
 import (
-	"github.com/x1n13y84issmd42/portobello/Client/service"
+	"github.com/x1n13y84issmd42/portobello/PortClient/service"
 	"github.com/x1n13y84issmd42/portobello/shared/models"
 )
 
