@@ -44,14 +44,12 @@ func (server *PortsServer) Listen(host string, port uint) {
 
 // AddPort ...
 func (server *PortsServer) AddPort(ctx context.Context, protoPort *proto.Port) (*proto.Empty, error) {
-	fmt.Println("AddPort")
 	server.Ports.Add(models.NewPortFromProto(protoPort))
 	return &proto.Empty{}, nil
 }
 
 // GetPort ...
 func (server *PortsServer) GetPort(ctx context.Context, portReq *proto.GetPortRequest) (*proto.Port, error) {
-	fmt.Printf("GetPort %s\n", portReq.ID)
 	port, err := server.Ports.Get(portReq.ID)
 	if err != nil {
 		fmt.Println(err.Error())

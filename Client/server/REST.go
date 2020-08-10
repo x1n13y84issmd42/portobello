@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/x1n13y84issmd42/portobello/Client/service"
+	"github.com/x1n13y84issmd42/portobello/Client/source"
 	"github.com/x1n13y84issmd42/portobello/shared/errors"
 )
 
@@ -15,6 +16,9 @@ type objectHandler func(*http.Request) (interface{}, uint, error)
 // Server is a REST server.
 type Server struct {
 	Ports service.Ports
+
+	ImportGoing    bool
+	ImportProgress uint
 }
 
 // New creates a new Server instance.
@@ -30,7 +34,7 @@ func (server *Server) Serve(host string, port uint) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/ports/", server.JSONHandler(server.HandlePorts))
-	mux.HandleFunc("/import", server.HandleImport)
+	mux.HandleFunc("/import", server.JSONHandler(server.HandleImport))
 
 	fmt.Printf("Starting the REST server @ %s:%d...\n", host, port)
 
@@ -87,7 +91,36 @@ func (server *Server) HandlePorts(r *http.Request) (interface{}, uint, error) {
 	return port, 200, nil
 }
 
-// HandleImport starts (or doesn't if already started) the port import process.
-func (server *Server) HandleImport(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("//TODO"))
+// ImportProgress is a JSON response for import progress.
+type ImportProgress struct {
+	Progress uint
+}
+
+// HandleImport is a /import route handler.
+// It starts (or doesn't if already started) the port import process.
+func (server *Server) HandleImport(r *http.Request) (interface{}, uint, error) {
+	if !server.ImportGoing {
+		fmt.Printf("Importing the ports file.\n")
+
+		progress, err := source.ImportPorts("ports.json", source.PortsStreamJSONReader, server.Ports)
+		if err != nil {
+			return nil, 500, err
+		}
+
+		go func() {
+			for server.ImportProgress = range progress {
+				//
+			}
+
+			fmt.Printf("Done importing.\n")
+			server.ImportGoing = false
+		}()
+
+		server.ImportGoing = true
+		server.ImportProgress = 0
+
+		return "Working!", 202, nil
+	}
+
+	return ImportProgress{Progress: server.ImportProgress}, 200, nil
 }

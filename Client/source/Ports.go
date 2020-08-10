@@ -12,13 +12,25 @@ type PortsChannel chan *models.Port
 type PortsReader func(string) (PortsChannel, error)
 
 // ImportPorts imports ports from the provided reader into the provided ports service.
-func ImportPorts(filePath string, reader PortsReader, ports service.Ports) {
+func ImportPorts(filePath string, reader PortsReader, ports service.Ports) (chan uint, error) {
 	ch, err := reader(filePath)
+	progressChannel := make(chan uint)
+
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	for port := range ch {
-		ports.AddPort(port)
-	}
+	var progress uint = 0
+
+	go func() {
+		for port := range ch {
+			ports.AddPort(port)
+			progress++
+			progressChannel <- progress
+		}
+
+		close(progressChannel)
+	}()
+
+	return progressChannel, nil
 }
