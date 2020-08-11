@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/x1n13y84issmd42/portobello/PortClient/service"
@@ -102,7 +103,12 @@ func (server *Server) HandleImport(r *http.Request) (interface{}, uint, error) {
 	if !server.ImportGoing {
 		fmt.Printf("Importing the ports file.\n")
 
-		progress, err := source.ImportPorts("ports.json", source.PortsStreamJSONReader, server.Ports)
+		file, fileErr := os.Open("ports.json")
+		if fileErr != nil {
+			return nil, 500, fileErr
+		}
+
+		progress, errors, err := source.ImportPorts(file, source.PortsStreamJSONReader, server.Ports)
 		if err != nil {
 			return nil, 500, err
 		}
@@ -117,6 +123,12 @@ func (server *Server) HandleImport(r *http.Request) (interface{}, uint, error) {
 
 			fmt.Printf("Done importing.\n")
 			server.ImportGoing = false
+		}()
+
+		go func() {
+			for err := range errors {
+				fmt.Printf("Port import error: %s.\n", err.Error())
+			}
 		}()
 
 		return "Working!", 202, nil

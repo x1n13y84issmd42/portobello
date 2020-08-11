@@ -54,7 +54,7 @@ func (ports *GRPCPorts) AddPort(port *models.Port) error {
 
 // GetPort looks up a port by the provided port ID.
 func (ports *GRPCPorts) GetPort(id models.PortID) (*models.Port, error) {
-	protoPort, err := ports.Client.GetPort(context.Background(), &proto.GetPortRequest{ID: string(id)})
+	protoPort, err := ports.Client.GetPort(context.Background(), &proto.GetPortRequest{ID: id})
 	if err != nil {
 		if statusCode := status.Code(err); statusCode == codes.NotFound {
 			return nil, errors.PortNotFound(id, "gRPC port service")
