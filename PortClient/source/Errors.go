@@ -25,7 +25,7 @@ type ErrJSONInvalidPortID struct {
 }
 
 func (err ErrJSONInvalidPortID) Error() string {
-	return fmt.Sprintf("Encountered invalid token where a port ID is expected. Must be string, but it's %T(%v)", err.Token, err.Token)
+	return fmt.Sprintf("Encountered invalid token where a port ID is expected. Must be string of 5 characters, but it's %T(%v)", err.Token, err.Token)
 }
 
 // JSONInvalidPortID creates a new ErrJSONInvalidPortID error instance.

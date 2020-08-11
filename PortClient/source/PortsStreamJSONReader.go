@@ -11,44 +11,47 @@ import (
 // and emits parsed ports via the returned channel.
 // Working in a streaming fashion, it works with arbitrarily
 // large JSON files without running out of memory.
-func PortsStreamJSONReader(r io.Reader) (PortsChannel, error) {
-	ch := make(PortsChannel)
+func PortsStreamJSONReader(r io.Reader, errors ErrorChannel) PortsChannel {
+	portsChan := make(PortsChannel)
 
 	// Reading the JSON files in a streaming fashion.
 	go func() {
-		defer close(ch)
+		defer close(portsChan)
 
 		decoder := json.NewDecoder(r)
 
-		// Skipping the '{'
+		// Reading the first token.
 		t, err := decoder.Token()
 		if err != nil {
-			panic(err)
+			errors <- err
+			return
 		}
 
-		if st, ok := t.(string); ok && st != "{" {
-			panic(JSONParseError("Invalid JSON format."))
+		// Checking it's an object delimiter '{'.
+		dt, ok := t.(json.Delim)
+		if !ok || dt != '{' {
+			errors <- JSONParseError("Invalid JSON format.")
+			return
 		}
 
 		for decoder.More() {
 			t, err = decoder.Token()
 			if err != nil {
-				panic(err)
+				errors <- (err)
 			}
 
-			if portID, ok := t.(string); ok {
+			if portID, ok := t.(string); ok && len(portID) == 5 {
 				port := &models.Port{}
 
 				if err := decoder.Decode(port); err == nil {
 					port.ID = portID
-					ch <- port
+					portsChan <- port
 				}
 			} else {
-				panic(JSONInvalidPortID(t))
+				errors <- JSONInvalidPortID(t)
 			}
-			//TODO: else {panic with wrong key type error}
 		}
 	}()
 
-	return ch, nil
+	return portsChan
 }

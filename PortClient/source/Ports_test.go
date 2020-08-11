@@ -4,6 +4,7 @@ import (
 	goerrors "errors"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -13,7 +14,7 @@ import (
 	"github.com/x1n13y84issmd42/portobello/shared/models"
 )
 
-func Mock_PortsReader(r io.Reader) (source.PortsChannel, error) {
+func Mock_PortsReader(r io.Reader, errors source.ErrorChannel) source.PortsChannel {
 	ch := make(source.PortsChannel)
 
 	go func() {
@@ -26,11 +27,26 @@ func Mock_PortsReader(r io.Reader) (source.PortsChannel, error) {
 
 	}()
 
-	return ch, nil
+	return ch
 }
 
-func Mock_PortsReader_Error(r io.Reader) (source.PortsChannel, error) {
-	return nil, goerrors.New("oops")
+func Mock_PortsReader_Error(r io.Reader, errors source.ErrorChannel) source.PortsChannel {
+	ch := make(source.PortsChannel)
+
+	go func() {
+		defer close(ch)
+
+		ch <- &models.Port{}
+		errors <- goerrors.New("err 1")
+		ch <- &models.Port{}
+		errors <- goerrors.New("err 2")
+		ch <- &models.Port{}
+		errors <- goerrors.New("err 3")
+		ch <- &models.Port{}
+
+	}()
+
+	return ch
 }
 
 type Mock_PortsService_Counter struct {
@@ -76,22 +92,25 @@ func Test_ImportPorts(T *testing.T) {
 		assert.Equal(T, progress, ports.AddedCounter)
 	})
 
-	T.Run("ErrorChan", func(T *testing.T) {
-		expected := []error{
-			goerrors.New("oops_1"),
-			goerrors.New("oops_2"),
-			goerrors.New("oops_3"),
-			goerrors.New("oops_4"),
+	T.Run("Errors", func(T *testing.T) {
+		expected := []string{
+			"err 1",
+			"err 2",
+			"err 3",
+			"oops_1",
+			"oops_2",
+			"oops_3",
+			"oops_4",
 		}
 
 		ports := &Mock_PortsService_Counter{
 			DoError: true,
 		}
 
-		progressChan, errorChan, _ := source.ImportPorts(strings.NewReader(""), Mock_PortsReader, ports)
+		progressChan, errorChan, _ := source.ImportPorts(strings.NewReader(""), Mock_PortsReader_Error, ports)
 
 		wg := sync.WaitGroup{}
-		wg.Add(1)
+		wg.Add(2)
 
 		var progress uint = 0
 		go func() {
@@ -102,10 +121,11 @@ func Test_ImportPorts(T *testing.T) {
 			wg.Done()
 		}()
 
-		var actual []error
+		var actual []string
+
 		go func() {
 			for err := range errorChan {
-				actual = append(actual, err)
+				actual = append(actual, err.Error())
 			}
 
 			wg.Done()
@@ -113,19 +133,9 @@ func Test_ImportPorts(T *testing.T) {
 
 		wg.Wait()
 
+		sort.Strings(actual)
+
 		assert.Equal(T, progress, uint(0))
-		assert.Equal(T, expected, actual)
-	})
-
-	T.Run("Error", func(T *testing.T) {
-		ports := &Mock_PortsService_Counter{}
-
-		expected := goerrors.New("oops")
-
-		progressChan, errorChan, actual := source.ImportPorts(strings.NewReader(""), Mock_PortsReader_Error, ports)
-
-		assert.Nil(T, progressChan)
-		assert.Nil(T, errorChan)
 		assert.Equal(T, expected, actual)
 	})
 
