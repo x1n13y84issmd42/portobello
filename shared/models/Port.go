@@ -2,6 +2,7 @@ package models
 
 import "github.com/x1n13y84issmd42/portobello/shared/proto"
 
+// PortID is a port ID, y'know.
 type PortID = string
 
 // Port describes an entry in the ports.json file.
