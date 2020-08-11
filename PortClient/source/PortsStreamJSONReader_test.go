@@ -9,7 +9,7 @@ import (
 	"github.com/x1n13y84issmd42/portobello/shared/models"
 )
 
-func TestPortsStreamJSONReader(T *testing.T) {
+func Test_PortsStreamJSONReader(T *testing.T) {
 	T.Run("InvalidJSON", func(T *testing.T) {
 		r := strings.NewReader("TOTALLY INVALID JSON")
 
