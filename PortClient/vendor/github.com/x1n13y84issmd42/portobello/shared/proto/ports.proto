@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package portobello;
+
+option go_package = "github.com/x1n13y84issmd42/portobello/shared/proto";
+
+service Ports {
+	rpc AddPort(Port) returns(Empty) {}
+
+	rpc GetPort(GetPortRequest) returns (Port) {}
+}
+
+message Port {
+	string ID = 1;
+	string Name = 2;
+	string City = 3;
+	string Country = 4;
+	repeated string Alias = 5;
+	repeated string Regions = 6;
+	repeated float Coordinates = 7;
+	string Province = 8;
+	string Timezone = 9;
+	repeated string Unlocs = 10;
+	string Code = 11;
+}
+
+message GetPortRequest {
+	string ID = 1;
+}
+
+message Empty {
+
+}
